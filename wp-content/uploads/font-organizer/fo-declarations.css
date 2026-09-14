@@ -1,0 +1,60 @@
+/* This Awesome CSS file was created by Font Orgranizer from Hive :) */
+
+
+@font-face {
+    font-family: 'Galano';
+    
+    src: url('//www.dratereza.com.br/wp-content/uploads/font-organizer/GalanoGrotesque-Regular.woff') format('woff');
+font-weight: normal;
+}
+
+@font-face {
+    font-family: 'Galano';
+    
+    src: url('//www.dratereza.com.br/wp-content/uploads/font-organizer/GalanoGrotesque-Italic.woff') format('woff');
+font-style: italic;
+}
+
+@font-face {
+    font-family: 'Galano';
+    
+    src: url('//www.dratereza.com.br/wp-content/uploads/font-organizer/GalanoGrotesque-Bold.woff') format('woff');
+font-weight: 700;
+}
+
+@font-face {
+    font-family: 'Galano';
+    
+    src: url('//www.dratereza.com.br/wp-content/uploads/font-organizer/GalanoGrotesque-BoldItalic.woff') format('woff');
+font-weight: 700;
+font-style: italic;
+}
+
+@font-face {
+    font-family: 'Abril';
+    
+    src: url('//www.dratereza.com.br/wp-content/uploads/font-organizer/AbrilText-Bold.woff') format('woff');
+font-weight: 700;
+}
+
+@font-face {
+    font-family: 'Abril';
+    
+    src: url('//www.dratereza.com.br/wp-content/uploads/font-organizer/AbrilText-BoldItalic.woff') format('woff');
+font-weight: 700;
+font-style: italic;
+}
+
+@font-face {
+    font-family: 'Abril';
+    
+    src: url('//www.dratereza.com.br/wp-content/uploads/font-organizer/AbrilText-Regular.woff') format('woff');
+font-weight: normal;
+}
+
+@font-face {
+    font-family: 'Abril';
+    
+    src: url('//www.dratereza.com.br/wp-content/uploads/font-organizer/AbrilText-Italic.woff') format('woff');
+font-style: italic;
+}
