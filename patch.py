@@ -3,7 +3,7 @@ import re
 with open("index.html", "r", encoding="utf-8") as f:
     html = f.read()
 
-CDN = "https://cdn.jsdelivr.net/gh/Aiello-Digital/dratereza-original-clone@main"
+CDN = "https://cdn.jsdelivr.net/gh/Aiello-Digital/dratereza-original-clone@f55f420942d42f9f3c6c055198f82afa45998a5b"
 
 # Rewrite local WP asset URLs to jsDelivr CDN (mirrored copy), keep every other
 # external URL (Google Fonts, GTM, GA, Maps, etc.) untouched.
