@@ -12,53 +12,67 @@ html = html.replace("https://www.dratereza.com.br/wp-content/", CDN + "/wp-conte
 html = html.replace("https://www.dratereza.com.br/wp-includes/", CDN + "/wp-includes/")
 print(f"Rewrote {before_count} local asset URL occurrences to jsDelivr CDN")
 
-# Bug fix patch: the Enfold "tab section" widget (avia_sc_tab_section) has a
-# known height-calculation bug where .av-tab-section-inner-container ends up
-# with a height far taller than the visible tab (a large blank gap below the
-# "Em cada momento um cuidado especial" section), which "fixes itself" once
-# the theme's own recalculation runs (e.g. after a tab click). This patch
-# forces the correct height proactively/continuously for a few seconds after
-# load and after each tab click, without touching the original theme files.
+# ---------------------------------------------------------------------------
+# Bug fix: "Em cada momento um cuidado especial" (Enfold av_tab_section widget)
+# leaves a large blank gap below it on first load, which goes away the moment
+# a tab is clicked.
+#
+# Root cause (confirmed by live inspection of the real, unpatched page):
+#   - `.av-tab-section-inner-container` computes as `display:table` and each
+#     of the 5 slide panels (`[data-av-tab-section-content]`) as
+#     `display:table-cell`. Outside of an actual <table>/<tr> structure this
+#     makes the browser generate one anonymous table row PER cell instead of
+#     one shared row, so the 5 panels stack instead of sitting side by side,
+#     and each panel is squeezed to ~100px wide.
+#   - Enfold's own JS (`avia_sc_tab_section`) measures each panel's
+#     `.av-layout-tab-inner` height while it's in that squeezed, wrapped
+#     state and bakes the (wrong, much taller) result into an inline
+#     `height:...px` on `.av-layout-tab-inner`. That inflated height is what
+#     shows up as blank space below the visible slide.
+#   - Clicking a tab re-runs that same measurement function, but by then the
+#     click handler forces a correct `display:table-cell` reflow first, so it
+#     (accidentally) computes and stores the right height instead - which is
+#     exactly why the gap "goes away" the moment you pick any option.
+#
+# Fix: force the intended side-by-side layout (block + float, 100vw each,
+# matching the `translate3d(-N * 100%, 0, 0)` slide logic already used by the
+# theme) instead of the broken table layout, and clear the bad inline height
+# Enfold's own script stamped onto each panel so the browser sizes them from
+# their real content once fonts/images have settled. Nothing else about the
+# page is touched.
+# ---------------------------------------------------------------------------
 patch_script = """
+<style id="tab-height-bugfix-css">
+.av-tab-section-container.av-tab-slide-transition .av-tab-section-inner-container {
+  display: block !important;
+}
+.av-tab-section-container.av-tab-slide-transition .av-tab-section-inner-container [data-av-tab-section-content] {
+  display: block !important;
+  float: left !important;
+  width: 100vw !important;
+}
+</style>
 <script id="tab-height-bugfix">
 (function () {
-  function fixTabSection(root) {
-    if (!root || root.offsetParent === null) return; // hidden (e.g. mobile fallback variant)
-    var inner = root.querySelector('.av-tab-section-inner-container');
-    var titles = root.querySelectorAll('.av-tab-section-tab-title-container .av-section-tab-title');
-    var sections = root.querySelectorAll(':scope > .av-tab-section-outer-container .av_tab_section, .av_tab_section');
-    if (!inner || !titles.length || !sections.length) return;
-    var idx = 0;
-    for (var i = 0; i < titles.length; i++) {
-      if (titles[i].classList.contains('av-active-tab-title')) { idx = i; break; }
-    }
-    var active = sections[idx];
-    if (!active) return;
-    var contentInner = active.querySelector('.av-layout-tab-inner') || active;
-    var h = contentInner.scrollHeight;
-    if (h > 0 && Math.abs(parseInt(inner.style.height, 10) - h) > 2) {
-      inner.style.height = h + 'px';
-    }
+  function clearBadHeights() {
+    document.querySelectorAll('.av-tab-section-container [data-av-tab-section-content] .av-layout-tab-inner').forEach(function (el) {
+      el.style.height = '';
+    });
   }
-  function fixAll() {
-    document.querySelectorAll('.av-tab-section-container').forEach(fixTabSection);
-  }
-
-  document.addEventListener('DOMContentLoaded', fixAll);
-  window.addEventListener('load', function () {
+  function run() {
+    clearBadHeights();
+    // Enfold's own script also recalculates on load/resize; keep re-clearing
+    // for a few seconds so it can't leave a stale height behind while fonts
+    // and lazy-loaded images are still settling.
     var tries = 0;
     var iv = setInterval(function () {
-      fixAll();
+      clearBadHeights();
       tries++;
-      if (tries > 16) clearInterval(iv); // keep correcting for ~8s while lazy content/images settle
-    }, 500);
-  });
-  document.addEventListener('click', function (e) {
-    if (e.target.closest && e.target.closest('.av-section-tab-title')) {
-      setTimeout(fixAll, 50);
-      setTimeout(fixAll, 700);
-    }
-  });
+      if (tries > 10) clearInterval(iv);
+    }, 400);
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', run);
 })();
 </script>
 """

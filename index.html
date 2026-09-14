@@ -686,45 +686,37 @@ var AviaPrivacyCookieAdditionalData = {"cookie_refuse_button_alert":"When refusi
 		<script>window.addEventListener('click', function (elem) { var _elem$target, _elem$target$dataset, _window, _window$_trfq; return (elem === null || elem === void 0 ? void 0 : (_elem$target = elem.target) === null || _elem$target === void 0 ? void 0 : (_elem$target$dataset = _elem$target.dataset) === null || _elem$target$dataset === void 0 ? void 0 : _elem$target$dataset.eid) && ((_window = window) === null || _window === void 0 ? void 0 : (_window$_trfq = _window._trfq) === null || _window$_trfq === void 0 ? void 0 : _window$_trfq.push(["cmdLogEvent", "click", elem.target.dataset.eid]));});</script>
 		<script src='https://img1.wsimg.com/traffic-assets/js/tccl-tti.min.js' onload="window.tti.calculateTTI()"></script>
 		
+<style id="tab-height-bugfix-css">
+.av-tab-section-container.av-tab-slide-transition .av-tab-section-inner-container {
+  display: block !important;
+}
+.av-tab-section-container.av-tab-slide-transition .av-tab-section-inner-container [data-av-tab-section-content] {
+  display: block !important;
+  float: left !important;
+  width: 100vw !important;
+}
+</style>
 <script id="tab-height-bugfix">
 (function () {
-  function fixTabSection(root) {
-    if (!root || root.offsetParent === null) return; // hidden (e.g. mobile fallback variant)
-    var inner = root.querySelector('.av-tab-section-inner-container');
-    var titles = root.querySelectorAll('.av-tab-section-tab-title-container .av-section-tab-title');
-    var sections = root.querySelectorAll(':scope > .av-tab-section-outer-container .av_tab_section, .av_tab_section');
-    if (!inner || !titles.length || !sections.length) return;
-    var idx = 0;
-    for (var i = 0; i < titles.length; i++) {
-      if (titles[i].classList.contains('av-active-tab-title')) { idx = i; break; }
-    }
-    var active = sections[idx];
-    if (!active) return;
-    var contentInner = active.querySelector('.av-layout-tab-inner') || active;
-    var h = contentInner.scrollHeight;
-    if (h > 0 && Math.abs(parseInt(inner.style.height, 10) - h) > 2) {
-      inner.style.height = h + 'px';
-    }
+  function clearBadHeights() {
+    document.querySelectorAll('.av-tab-section-container [data-av-tab-section-content] .av-layout-tab-inner').forEach(function (el) {
+      el.style.height = '';
+    });
   }
-  function fixAll() {
-    document.querySelectorAll('.av-tab-section-container').forEach(fixTabSection);
-  }
-
-  document.addEventListener('DOMContentLoaded', fixAll);
-  window.addEventListener('load', function () {
+  function run() {
+    clearBadHeights();
+    // Enfold's own script also recalculates on load/resize; keep re-clearing
+    // for a few seconds so it can't leave a stale height behind while fonts
+    // and lazy-loaded images are still settling.
     var tries = 0;
     var iv = setInterval(function () {
-      fixAll();
+      clearBadHeights();
       tries++;
-      if (tries > 16) clearInterval(iv); // keep correcting for ~8s while lazy content/images settle
-    }, 500);
-  });
-  document.addEventListener('click', function (e) {
-    if (e.target.closest && e.target.closest('.av-section-tab-title')) {
-      setTimeout(fixAll, 50);
-      setTimeout(fixAll, 700);
-    }
-  });
+      if (tries > 10) clearInterval(iv);
+    }, 400);
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', run);
 })();
 </script>
 
