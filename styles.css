@@ -62,6 +62,7 @@ section { padding: 100px 0; }
   border-bottom: 1px solid rgba(31,42,55,0.06);
 }
 .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 14px var(--container-padding); }
+.logo { flex-shrink: 0; }
 .logo img { height: 22px; width: auto; }
 .main-nav { display: flex; gap: 28px; }
 .main-nav a { font-size: 0.92rem; font-weight: 500; color: var(--color-text); transition: color var(--transition); }
